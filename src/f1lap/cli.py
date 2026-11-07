@@ -11,6 +11,7 @@ import pandas as pd
 from . import plots
 from .data import load_race, synthetic_race, validate_laps
 from .models import PhysicsLapModel
+from .openf1 import describe, load_race_openf1
 from .report import write_report
 from .strategy import analyse_strategies
 from .validation import SCHEMES, coverage_by_group, evaluate_race, summarise
@@ -18,6 +19,13 @@ from .verify import run_verification
 
 log = logging.getLogger("f1lap")
 MIN_LAPS = 200
+
+
+def _load_one(args, year: int, gp: str):
+    """Load one race from the selected data source."""
+    if args.source == "fastf1":
+        return load_race(year, gp, args.cache_dir or ".fastf1_cache")
+    return load_race_openf1(year, gp, args.cache_dir or ".openf1_cache")
 
 
 def _load(args):
@@ -31,7 +39,7 @@ def _load(args):
     for gp in args.races:
         name = f"{args.year} {gp}"
         try:
-            races[name], droplogs[name] = load_race(args.year, gp, args.cache_dir)
+            races[name], droplogs[name] = _load_one(args, args.year, gp)
         except Exception as exc:  # network, unknown event, schema change: keep going
             log.error("could not load %s: %s", name, exc)
     return races, droplogs
@@ -144,7 +152,7 @@ def strategy(args) -> int:
         name, df = "synthetic-0", synthetic_race(seed=0, name="synthetic-0", outlier_frac=0.02)
     else:
         name = f"{args.year} {args.race}"
-        df, _ = load_race(args.year, args.race, args.cache_dir)
+        df, _ = _load_one(args, args.year, args.race)
     model = PhysicsLapModel().fit(df)
     res = analyse_strategies(
         model,
@@ -177,6 +185,19 @@ def strategy(args) -> int:
     return 0
 
 
+def source_check(args) -> int:
+    """Diagnose the data source: does it return what the loader expects?"""
+    info = describe(args.year, args.race, args.cache_dir or ".openf1_cache")
+    s = info["session"]
+    print(
+        f"session {s.get('session_key')}: {s.get('country_name')} / {s.get('location')}, "
+        f"{s.get('year')}"
+    )
+    for ep in ("laps", "stints", "pit", "drivers", "race_control"):
+        print(f"{ep:>13}: {info[ep]['rows']:>5} rows  fields: {', '.join(info[ep]['fields'])}")
+    return 0
+
+
 def verify(args) -> int:
     os.makedirs(args.out, exist_ok=True)
     vdf = run_verification(args.n_races, outlier_frac=args.outlier_frac)
@@ -200,7 +221,13 @@ def main(argv=None) -> int:
     r.add_argument("--alpha", type=float, default=0.10, help="1 - nominal interval coverage")
     r.add_argument("--seed", type=int, default=0)
     r.add_argument("--n-boot", type=int, default=300)
-    r.add_argument("--cache-dir", default=".fastf1_cache")
+    r.add_argument(
+        "--source",
+        choices=["openf1", "fastf1"],
+        default="openf1",
+        help="openf1: free, no account (2023+). fastf1: needs an F1TV account",
+    )
+    r.add_argument("--cache-dir", default=None)
     r.add_argument("--out", default="results")
     r.set_defaults(func=run)
     st = sub.add_parser("strategy", help="rank tyre strategies with propagated uncertainty")
@@ -213,9 +240,15 @@ def main(argv=None) -> int:
     st.add_argument("--draws", type=int, default=2000)
     st.add_argument("--step", type=int, default=1, help="stint-length grid step (speed)")
     st.add_argument("--seed", type=int, default=0)
-    st.add_argument("--cache-dir", default=".fastf1_cache")
+    st.add_argument("--source", choices=["openf1", "fastf1"], default="openf1")
+    st.add_argument("--cache-dir", default=None)
     st.add_argument("--out", default="results")
     st.set_defaults(func=strategy)
+    sc = sub.add_parser("source-check", help="diagnose the OpenF1 data source for one race")
+    sc.add_argument("--year", type=int, default=2024)
+    sc.add_argument("--race", default="Bahrain")
+    sc.add_argument("--cache-dir", default=None)
+    sc.set_defaults(func=source_check)
     v = sub.add_parser("verify", help="check parameter recovery on synthetic races")
     v.add_argument("--n-races", type=int, default=30)
     v.add_argument("--outlier-frac", type=float, default=0.0)
