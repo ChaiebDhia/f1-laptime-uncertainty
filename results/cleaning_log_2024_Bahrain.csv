@@ -1,0 +1,9 @@
+step,removed,remaining
+raw laps,0,1129
+missing lap time or tyre data,0,1129
+not a dry compound,0,1129
+lap 1,20,1109
+track status not green,20,1089
+flagged inaccurate by FastF1,0,1089
+pit in/out lap,81,1008
+outside 107% of fastest lap,32,976

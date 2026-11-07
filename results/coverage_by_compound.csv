@@ -1,0 +1,19 @@
+compound,model,n,coverage,scheme
+HARD,Physics (analytic CI),1781,0.8343627175743964,stint_holdout
+HARD,"Hybrid (physics+GBM, conformal)",1781,0.8697361033127456,stint_holdout
+HARD,GBM (quantile),1781,0.5418304323413813,stint_holdout
+MEDIUM,Physics (analytic CI),737,0.8860244233378561,stint_holdout
+MEDIUM,"Hybrid (physics+GBM, conformal)",737,0.9077340569877883,stint_holdout
+MEDIUM,GBM (quantile),737,0.5970149253731343,stint_holdout
+SOFT,Physics (analytic CI),688,0.8226744186046512,stint_holdout
+SOFT,"Hybrid (physics+GBM, conformal)",688,0.8938953488372093,stint_holdout
+SOFT,GBM (quantile),688,0.5421511627906976,stint_holdout
+HARD,Physics (analytic CI),497,0.8611670020120724,late_stint
+HARD,"Hybrid (physics+GBM, conformal)",497,0.8611670020120724,late_stint
+HARD,GBM (quantile),497,0.6096579476861167,late_stint
+MEDIUM,Physics (analytic CI),204,0.8921568627450981,late_stint
+MEDIUM,"Hybrid (physics+GBM, conformal)",204,0.9166666666666666,late_stint
+MEDIUM,GBM (quantile),204,0.7107843137254902,late_stint
+SOFT,Physics (analytic CI),164,0.8536585365853658,late_stint
+SOFT,"Hybrid (physics+GBM, conformal)",164,0.8658536585365854,late_stint
+SOFT,GBM (quantile),164,0.6829268292682927,late_stint
