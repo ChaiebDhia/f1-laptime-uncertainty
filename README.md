@@ -46,10 +46,11 @@ Real-data results from `f1lap run` (full tables in [`results/REPORT.md`](results
 
 **Key findings**
 
-- **Accuracy.** On late-stint forecasts (865 held-out laps, 3 races) the lowest RMSE was physics at 0.53 s (95% CI 0.48 to 0.58); hybrid 0.54 s, boosting 0.68 s. On unseen stints the lowest RMSE was physics at 0.55 s.
+- **Accuracy.** On late-stint forecasts (865 held-out laps, 3 races), RMSE was physics 0.53 s (95% CI 0.48 to 0.58); hybrid 0.54 s (not distinguishable from physics: intervals overlap); boosting 0.68 s (clearly worse: 95% intervals do not overlap). On unseen stints the lowest RMSE was physics at 0.55 s.
 - **Calibration.** Empirical coverage of the nominal 90% intervals on late-stint forecasts: physics 87%, hybrid 88%, boosting 65%. Coverage by compound is in `results/REPORT.md`.
-- **Physics.** The fuel and track-evolution slope `k` was fitted between -0.071 and -0.045 s per lap across the races.
-- **Decision.** For 2024 Bahrain at an assumed 22 s pit loss, the highest-probability plan was S17 + H20 + H20 (probability fastest 100%). Model-based what-if: no traffic or safety cars.
+- **Physics.** The fuel and track-evolution slope `k` was fitted between -0.071 and -0.045 s per lap across the races, with narrow confidence intervals.
+- **Caveat.** In 2 of 3 races the fitted degradation rates were not ordered soft >= medium >= hard, in 2 the degradation shape `p` was below 1, and in 1 at least one parameter had no defined standard error. Forecasts and `k` are well determined, but the per-compound rates are weakly identified (tyre age and race lap are collinear): read them as fitted terms, not physical constants.
+- **Decision.** For 2024 Bahrain at an assumed 22 s pit loss, the highest-probability plan was S17 + H20 + H20 (probability fastest 100% under parameter uncertainty only; model error, traffic and safety cars are not included).
 
 ## Data sources
 
