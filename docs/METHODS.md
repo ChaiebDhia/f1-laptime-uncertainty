@@ -8,8 +8,9 @@ strategy-relevant one: tyre degradation has to be extrapolated forward in time.
 
 ## 2. Data
 
-Public timing data via [FastF1](https://docs.fastf1.dev). One row per lap with driver, stint, race lap, tyre
-compound, tyre age and lap time. `clean_laps` keeps representative racing laps and **logs every removal**:
+Public timing data from [OpenF1](https://openf1.org) (default; free, historical data from 2023, no account) or
+[FastF1](https://docs.fastf1.dev) (needs an F1TV account since Formula 1 put its data APIs behind a login in
+October 2026). One row per lap with driver, stint, race lap, tyre compound, tyre age and lap time. `clean_laps` keeps representative racing laps and **logs every removal**:
 
 | Step | Why |
 |---|---|
@@ -20,6 +21,14 @@ compound, tyre age and lap time. `clean_laps` keeps representative racing laps a
 | flagged inaccurate by FastF1 | FastF1's own timing-sync flag |
 | pit in/out laps | not racing pace |
 | outside 107% of the fastest surviving lap | gross outliers (spins, damage, slow zones) |
+
+**OpenF1 specifics.** Tyre age is `tyre_age_at_start` plus laps run in the stint (FastF1's `TyreLife`
+convention). Pit in/out laps come from `is_pit_out_lap`, the pit-stop table and the last lap of every non-final
+stint. OpenF1 has no `IsAccurate` flag, so any lap with a recorded time counts as accurate. **Green-flag laps are an
+approximation** built from race-control messages: laps under a safety car or virtual safety car (plus the
+following lap) and laps with a yellow, double-yellow or red flag are excluded. This is stricter than FastF1's
+track-status filter for local yellow flags, and may remove more laps than strictly necessary. OpenF1's tyre age for
+used sets is occasionally corrected after the fact, so it can carry small errors.
 
 `validate_laps` then checks for NaNs, non-positive times, duplicate (driver, lap) rows, unknown compounds and
 tyre age that decreases within a stint. Problems are logged as warnings, not silently ignored.
