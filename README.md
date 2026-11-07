@@ -46,8 +46,10 @@ Real-data results from `f1lap run` (full tables in [`results/REPORT.md`](results
 
 **Key findings**
 
-<!-- REPLACE this block with 3 bullets taken from results/REPORT.md after your real-data run. -->
-- _See `results/REPORT.md` for this run's accuracy, interval coverage and fitted parameters._
+- **Accuracy.** On late-stint forecasts (865 held-out laps, 3 races) the lowest RMSE was physics at 0.53 s (95% CI 0.48 to 0.58); hybrid 0.54 s, boosting 0.68 s. On unseen stints the lowest RMSE was physics at 0.55 s.
+- **Calibration.** Empirical coverage of the nominal 90% intervals on late-stint forecasts: physics 87%, hybrid 88%, boosting 65%. Coverage by compound is in `results/REPORT.md`.
+- **Physics.** The fuel and track-evolution slope `k` was fitted between -0.071 and -0.045 s per lap across the races.
+- **Decision.** For 2024 Bahrain at an assumed 22 s pit loss, the highest-probability plan was S17 + H20 + H20 (probability fastest 100%). Model-based what-if: no traffic or safety cars.
 
 ## Data sources
 
