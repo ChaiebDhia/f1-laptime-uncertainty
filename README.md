@@ -28,6 +28,7 @@ pip install -e ".[dev]"
 
 pytest                             # unit tests, no network needed
 f1lap run --synthetic              # full pipeline on generated data, no network needed
+f1lap source-check --year 2024 --race Bahrain         # is the data source reachable and as expected?
 f1lap run --year 2024 --races Bahrain Spain Hungary   # real data (first run downloads and caches)
 f1lap verify                       # parameter-recovery check on synthetic races
 f1lap strategy --year 2024 --race Bahrain --pit-loss 22   # tyre strategy under uncertainty
@@ -47,6 +48,16 @@ Real-data results from `f1lap run` (full tables in [`results/REPORT.md`](results
 
 <!-- REPLACE this block with 3 bullets taken from results/REPORT.md after your real-data run. -->
 - _See `results/REPORT.md` for this run's accuracy, interval coverage and fitted parameters._
+
+## Data sources
+
+| Source | Needs | Notes |
+|---|---|---|
+| **OpenF1** (default, `--source openf1`) | nothing; free, no account | Historical data from 2023. Tyre compound, stints, pit stops, race control. Green-flag laps are approximated from race-control messages |
+| **FastF1** (`--source fastf1`) | an F1TV Access account | Formula 1 put its data APIs behind a login in October 2026; FastF1 3.9 prompts for it |
+
+Both feed the same cleaning and validation code. Raw data is cached locally (`.openf1_cache/`,
+`.fastf1_cache/`) and never committed.
 
 ## How the evaluation is built (the part that matters)
 
@@ -79,7 +90,7 @@ linearising a power-law exponent, and reported as is.
 ## Engineering
 
 - Installable package (`src/` layout, `f1lap` CLI), type-annotated, linted with Ruff.
-- 30 tests covering cleaning, validation, models, splits, metrics and strategy maths (hand-computed values),
+- 37 tests covering cleaning, validation, models, splits, metrics and strategy maths (hand-computed values),
   robustness to outliers, and the CLI end to end. The FastF1 loader is tested against a mock session using FastF1's
   documented schema.
 - GitHub Actions CI on Python 3.11 and 3.12 (lint, tests, end-to-end smoke runs) plus a Docker build job; Dependabot keeps actions and dependencies current.
@@ -89,6 +100,7 @@ linearising a power-law exponent, and reported as is.
 ```
 src/f1lap/
   data.py        FastF1 loading, cleaning with drop log, validation, synthetic races
+  openf1.py      OpenF1 loading (free, no account), caching, retries, green-flag approximation
   models.py      PhysicsLapModel, QuantileGBM, HybridLapModel (+ split-conformal)
   splits.py      stint hold-out, late-stint, calibration splits
   validation.py  schemes, metrics, interval score, cluster bootstrap, coverage by group
@@ -115,7 +127,7 @@ parametric route and puts the weight on validation and calibrated uncertainty.
 ## Disclaimer
 
 Unofficial project using publicly available timing data through the open-source
-[FastF1](https://github.com/theOehrly/Fast-F1) library. Not affiliated with, endorsed by or connected to
+[OpenF1](https://openf1.org) API and, optionally, the [FastF1](https://github.com/theOehrly/Fast-F1) library. Not affiliated with, endorsed by or connected to
 Formula 1, the FIA or any team. No raw timing data is included in this repository.
 
 ## License
