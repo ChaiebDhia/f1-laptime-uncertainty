@@ -1,0 +1,40 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.11", "3.12"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: pip
+      - name: Install
+        run: pip install -e ".[dev]"
+      - name: Lint
+        run: |
+          ruff check .
+          ruff format --check .
+      - name: Tests
+        run: pytest
+      - name: End-to-end smoke run on synthetic data
+        run: |
+          f1lap run --synthetic --synthetic-races 1 --n-boot 50 --out /tmp/ci-results
+          f1lap strategy --synthetic --step 3 --draws 200 --out /tmp/ci-results
+
+  docker:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build image
+        run: docker build -t f1lap .
+      - name: Run container on synthetic data
+        run: docker run --rm f1lap run --synthetic --synthetic-races 1 --n-boot 30 --out /results
